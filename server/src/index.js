@@ -1,10 +1,16 @@
 import express from "express";
 import { connectDB } from "./utils/connectDB.js";
+import dotenv from "dotenv";
+
+// Add error handling to dotenv.config()
+ dotenv.config();
+
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT =  8000;
 
 
+connectDB();
 app.use(express.json());
 
 app.get("/", (req, res) => {
