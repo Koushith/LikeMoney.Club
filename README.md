@@ -33,4 +33,4 @@ For more information, reach out to us:
 
 ---
 
-© 2023 LikeMoney.Club. All rights reserved.
+© 2024 LikeMoney.Club. All rights reserved.
