@@ -52,7 +52,7 @@ const QRCodeContent = () => (
     <div className="flex flex-col items-center space-y-4">
       <Spinner className="h-8 w-8 text-primary" />
       <p className="text-sm text-muted-foreground text-center">
-        Waiting for Reclaim proofs to be submitted...
+        Waiting for Reclaim proofs to be submitted..
       </p>
     </div>
   </div>
