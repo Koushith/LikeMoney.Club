@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import { RootLayout } from "./layouts";
-import { AuthScreen, CampaignDetailScreen, HomeScreen } from "./screens";
+import { AuthScreen, CampaignDetailScreen, CreateCampaignScreen, HomeScreen } from "./screens";
 
 
 export const routerConfig = createBrowserRouter([
@@ -17,6 +17,11 @@ export const routerConfig = createBrowserRouter([
         path: "/campaign/:id",
         element: <CampaignDetailScreen />,
         errorElement: <div>Error loading campaign detail screen</div>,
+      }
+      ,{
+        path: "/campaign",
+        element: <CreateCampaignScreen />,
+        errorElement: <div>Error loading campaign screen</div>,
       }
       ,{
         path: "/auth",
