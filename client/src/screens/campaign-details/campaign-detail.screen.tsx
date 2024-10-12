@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
-import { QRCodeSVG } from 'qrcode.react';
+import QRCode from "react-qr-code";
+
 import {
   Drawer,
   DrawerContent,
@@ -48,7 +49,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ className, size = 24, ...props
 
 const QRCodeContent = () => (
   <div className="flex flex-col items-center space-y-6 p-6">
-    <QRCodeSVG value="https://example.com/submit-proof" size={200} className="border-4 border-white rounded-lg shadow-lg" />
+    <QRCode value="https://example.com/submit-proof" size={200} className="border-4 border-white rounded-lg shadow-lg" />
     <div className="flex flex-col items-center space-y-4">
       <Spinner className="h-8 w-8 text-primary" />
       <p className="text-sm text-muted-foreground text-center">

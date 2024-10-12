@@ -5,10 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { X } from 'lucide-react';
 
-const TagInput = ({ tags, setTags }) => {
-  const [input, setInput] = useState('');
+const TagInput = ({ tags, setTags }: { tags: string[], setTags: React.Dispatch<React.SetStateAction<string[]>> }) => {
+  const [input, setInput] = useState<string>('');
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
@@ -56,7 +56,7 @@ export const CreateCampaignScreen = () => {
     endDate: '',
     minViews: '', // New field for minimum views
   });
-  const [taggedBusinesses, setTaggedBusinesses] = useState([]);
+  const [taggedBusinesses, setTaggedBusinesses] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

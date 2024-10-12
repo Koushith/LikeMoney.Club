@@ -1,1 +1,3 @@
-export const BACKEND_URL = "http://localhost:8000"
+import { getBaseUrl } from "./helper";
+
+export const BACKEND_URL = getBaseUrl();
