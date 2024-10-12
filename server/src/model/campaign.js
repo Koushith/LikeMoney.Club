@@ -18,13 +18,10 @@ const campaignSchema = new mongoose.Schema(
     taggedBusiness: {
       type: String, //TODO: check this later
     },
-    viewCount: {
+    minViews: {
       type: Number,
     },
     budget: {
-      type: Number,
-    },
-    metrics: {
       type: Number,
     },
     startDate: {

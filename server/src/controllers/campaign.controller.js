@@ -14,16 +14,37 @@ import Campaign from "../model/campaign.js";
  */
 export const createCampaign = async (req, res) => {
   try {
-    const { title, description, budget, user } = req.body;
-    const campaign = await Campaign.create({
-      title,
+    const {
+      name,
       description,
+      bannerImage,
       budget,
+      startDate,
+      endDate,
+      minViews,
       user,
+    } = req.body;
+    console.log("minViews", minViews);
+    const campaign = await Campaign.create({
+      name,
+      description,
+      bannerImage,
+      budget,
+      startDate,
+      endDate,
+      minViews,
+      user: user._id,
     });
-    res.status(201).json(campaign);
+    res.status(201).json({
+      success: true,
+      message: "Campaign created successfully",
+      campaign,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
