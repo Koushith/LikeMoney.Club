@@ -1,10 +1,13 @@
+import { campaignApi } from '@/services/campaign.service'
 import { configureStore } from '@reduxjs/toolkit'
 // ...
 
 export const store = configureStore({
   reducer: {
- 
+    [campaignApi.reducerPath]: campaignApi.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(campaignApi.middleware),
   devTools: true,
 })
 

@@ -58,7 +58,7 @@ export const getAllCampaigns = async (req, res) => {
     const campaigns = await Campaign.find();
     res.status(200).json(campaigns);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -71,9 +71,9 @@ export const getCampaignById = async (req, res) => {
   try {
     const { id } = req.params;
     const campaign = await Campaign.findById(id);
-    res.status(200).json(campaign);
+    res.status(200).json({ success: true, campaign });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -92,9 +92,9 @@ export const updateCampaignById = async (req, res) => {
       budget,
       user,
     });
-    res.status(200).json(campaign);
+    res.status(200).json({ success: true, campaign });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -107,8 +107,10 @@ export const deleteCampaignById = async (req, res) => {
   try {
     const { id } = req.params;
     await Campaign.findByIdAndDelete(id);
-    res.status(200).json({ message: "Campaign deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Campaign deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
