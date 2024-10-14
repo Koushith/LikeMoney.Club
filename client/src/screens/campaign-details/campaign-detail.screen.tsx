@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import QRCode from "react-qr-code";
+import { ReclaimProofRequest } from "@reclaimprotocol/js-sdk";
 
 import {
   Drawer,
@@ -25,8 +26,12 @@ import {
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useGetCampaignByIdQuery } from "@/services/campaign.service";
+import {
+  useGetCampaignByIdQuery,
+  useUpdateCampaignByIdMutation,
+} from "@/services/campaign.service";
 import { CampaignDetailSkeleton } from "./campagin-details-skeliton";
+import { getBaseUrl } from "@/utils/helper";
 
 const mockParticipants = [
   {
@@ -82,10 +87,10 @@ export const Spinner: React.FC<SpinnerProps> = ({
   );
 };
 
-const QRCodeContent = () => (
+const QRCodeContent = ({ requestUrl }: { requestUrl: string }) => (
   <div className="flex flex-col items-center space-y-6 p-6">
     <QRCode
-      value="https://example.com/submit-proof"
+      value={requestUrl}
       size={200}
       className="border-4 border-white rounded-lg shadow-lg"
     />
@@ -100,6 +105,8 @@ const QRCodeContent = () => (
 
 export const CampaignDetailScreen = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [requestUrl, setRequestUrl] = useState<string | null>(null);
+
   const { id } = useParams();
 
   const {
@@ -108,10 +115,109 @@ export const CampaignDetailScreen = () => {
     isError,
   } = useGetCampaignByIdQuery(id as string);
 
+  const [updateCampaign, { isLoading: isUpdating }] =
+    useUpdateCampaignByIdMutation();
+
   if (isLoading) return <CampaignDetailSkeleton />;
   if (isError) return <div>Error fetching campaign details</div>;
 
   const campaign = campaignData?.campaign;
+
+  const reclaimInitilizer = async () => {
+    const response = await fetch(
+      `${getBaseUrl()}/api/reclaim/initialize-reclaim`
+    );
+    const { reclaimProofRequestConfig } = await response.json();
+
+    console.log("reclaimProofRequestConfig", reclaimProofRequestConfig);
+
+    // Reconstruct the ReclaimProofRequest object
+    const reclaimProofRequest = await ReclaimProofRequest.fromJsonString(
+      reclaimProofRequestConfig
+    );
+
+    console.log("reclaimProofRequest- parsed", reclaimProofRequest);
+
+    // Generate request URL and status URL
+    const requestUrl = await reclaimProofRequest.getRequestUrl();
+    const statusUrl = await reclaimProofRequest.getStatusUrl();
+
+    setRequestUrl(requestUrl);
+    //setStatusUrl(statusUrl);
+
+    await reclaimProofRequest.startSession({
+      onSuccess: async (proofs: any) => {
+        console.log("Verification success", proofs);
+        const { claimData } = proofs;
+        const { extractedParameters } = JSON.parse(claimData.context);
+
+        const fullName = JSON.parse(extractedParameters.ig_mention).full_name;
+        const username = JSON.parse(extractedParameters.ig_mention).username;
+        const hashtags = JSON.parse(extractedParameters.story_hashtags);
+        const viewerCount = extractedParameters.viewer_count;
+
+        console.log("Extracted data:", {
+          fullName,
+          username,
+          hashtags,
+          viewerCount,
+        });
+
+        // TODO: Handle the extracted data (e.g., update state, send to server, etc.)
+
+        const updatedCampaign = await updateCampaign({
+          id: id as string,
+          campaign: {
+            submissions: [
+              {
+                campaign: id as string,
+                user: "67004fdeff27e63129bb908c" as string,
+                content: "test" as string,
+
+                fullName: fullName as string,
+                username: username as string,
+                hashtags: hashtags as string,
+                viewCount: viewerCount as string,
+                rawProof: JSON.stringify(proofs),
+              },
+            ],
+          },
+        });
+
+        console.log("updatedCampaign", updatedCampaign);
+      },
+      onError: (error: Error) => {
+        console.error("Verification failed", error);
+      },
+    });
+  };
+
+  // const reclaimInitilizer = async () => {
+  //   const APP_ID = "0x624D6A92A5E75629c8352a8f105B7a222C7a6B6D";
+  //   const PROVIDER_ID = "b00f9875-ed44-4e08-b820-458f25dc5493";
+  //   const APP_SECRET =
+  //     "0x35fc484587319846b796178eee283c1d4151098a1e5af395e4f0efd110f7b2c8";
+  //   const reclaimProofRequest = await ReclaimProofRequest.init(
+  //     APP_ID,
+  //     APP_SECRET,
+  //     PROVIDER_ID
+  //   );
+
+  //   const requestUrl = await reclaimProofRequest.getRequestUrl();
+  //   console.log("Request URL:", requestUrl);
+  //   // In a real application, you would typically redirect the user to this URL or display it as a QR code.
+  //   const statusUrl = reclaimProofRequest.getStatusUrl();
+  //   console.log("Status URL:", statusUrl);
+  //   // Start Session and begin listening for proofs:
+  //   await reclaimProofRequest.startSession({
+  //     onSuccess: (proofs) => {
+  //       console.log("Verification success", proofs);
+  //     },
+  //     onError: (error) => {
+  //       console.error("Verification failed", error);
+  //     },
+  //   });
+  // };
 
   return (
     <motion.div
@@ -171,7 +277,7 @@ export const CampaignDetailScreen = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button>Submit Your Proof</Button>
+                  <Button onClick={reclaimInitilizer}>Submit Your Proof</Button>
                 </motion.div>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -181,7 +287,18 @@ export const CampaignDetailScreen = () => {
                     Scan this QR code with your device to submit your proof.
                   </DialogDescription>
                 </DialogHeader>
-                <QRCodeContent />
+                {requestUrl && (
+                  <div>
+                    <a
+                      href={requestUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open Request URL
+                    </a>
+                    <QRCodeContent requestUrl={requestUrl} />
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
           ) : (
@@ -191,7 +308,7 @@ export const CampaignDetailScreen = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button>Submit Your Proof</Button>
+                  <Button>Submit Your Proof----</Button>
                 </motion.div>
               </DrawerTrigger>
               <DrawerContent>
@@ -201,7 +318,7 @@ export const CampaignDetailScreen = () => {
                     Scan this QR code with your device to submit your proof.
                   </DrawerDescription>
                 </DrawerHeader>
-                <QRCodeContent />
+                <QRCodeContent requestUrl={requestUrl} />
               </DrawerContent>
             </Drawer>
           )}

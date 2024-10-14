@@ -23,10 +23,19 @@ export const campaignApi = createApi({
                 body: campaign
             }),
             invalidatesTags: ['Campaigns'],
-        })
+        }),
+        updateCampaignById: builder.mutation<Campaign, { id: string; campaign: Partial<Campaign | any> }>({
+            query: ({ id, campaign }) => ({
+                url: `/${id}`,
+                method: 'PUT',
+                body: campaign
+            }),
+            invalidatesTags: ['Campaigns'],
+        }),
+        
 
     })
 })
 
 
-export const { useGetAllCampaignsQuery, useCreateCampaignMutation, useGetCampaignByIdQuery } = campaignApi
+export const { useGetAllCampaignsQuery, useCreateCampaignMutation, useGetCampaignByIdQuery, useUpdateCampaignByIdMutation } = campaignApi
