@@ -61,7 +61,9 @@ export const getAllCampaigns = async (req, res) => {
 export const getCampaignById = async (req, res) => {
   try {
     const { id } = req.params;
-    const campaign = await Campaign.findById(id);
+    const campaign = await Campaign.findById(id).populate({
+      path: 'submissions',
+    });
     res.status(200).json({ success: true, campaign });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
