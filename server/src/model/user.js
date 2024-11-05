@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,15 +17,15 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    googleId: {
+    uid: {
       type: String,
       sparse: true, // Add this line
       unique: true, // Add this line if you want googleId to be unique when present
     },
     role: {
       type: String,
-      enum: ["user", "admin", "brand"],
-      default: "user",
+      enum: ['user', 'admin', 'brand'],
+      default: 'user',
     },
     profilePicture: {
       type: String,
@@ -34,6 +34,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 export default User;

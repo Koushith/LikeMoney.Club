@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import QRCode from "react-qr-code";
-import { ReclaimProofRequest } from "@reclaimprotocol/js-sdk";
+import React, { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import QRCode from 'react-qr-code';
+import { ReclaimProofRequest } from '@reclaimprotocol/js-sdk';
 
 import {
   Drawer,
@@ -13,7 +13,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from '@/components/ui/drawer';
 import {
   Dialog,
   DialogContent,
@@ -21,67 +21,106 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
-import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import {
-  useGetCampaignByIdQuery,
-  useUpdateCampaignByIdMutation,
-} from "@/services/campaign.service";
-import { CampaignDetailSkeleton } from "./campagin-details-skeliton";
-import { getBaseUrl } from "@/utils/helper";
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useGetCampaignByIdQuery, useUpdateCampaignByIdMutation } from '@/services/campaign.service';
+import { CampaignDetailSkeleton } from './campagin-details-skeliton';
+import { getBaseUrl } from '@/utils/helper';
+import { useUpdateSubmissionByCampaignIdMutation } from '@/services/submission.service';
 
 const mockParticipants = [
   {
-    id: "P001",
-    name: "Alice Johnson",
-    totalViews: "15,000",
-    instaId: "@alice_j",
-    proofDate: "May 5, 2024",
+    id: 'P001',
+    name: 'Alice Johnson',
+    totalViews: '15,000',
+    instaId: '@alice_j',
+    proofDate: 'May 5, 2024',
   },
   {
-    id: "P002",
-    name: "Bob Smith",
-    totalViews: "22,500",
-    instaId: "@bob_smith",
-    proofDate: "May 6, 2024",
+    id: 'P002',
+    name: 'Bob Smith',
+    totalViews: '22,500',
+    instaId: '@bob_smith',
+    proofDate: 'May 6, 2024',
   },
   {
-    id: "P003",
-    name: "Charlie Brown",
-    totalViews: "18,700",
-    instaId: "@charlie_b",
-    proofDate: "May 7, 2024",
+    id: 'P003',
+    name: 'Charlie Brown',
+    totalViews: '18,700',
+    instaId: '@charlie_b',
+    proofDate: 'May 7, 2024',
   },
   {
-    id: "P004",
-    name: "Diana Prince",
-    totalViews: "30,200",
-    instaId: "@diana_p",
-    proofDate: "May 8, 2024",
+    id: 'P004',
+    name: 'Diana Prince',
+    totalViews: '30,200',
+    instaId: '@diana_p',
+    proofDate: 'May 8, 2024',
   },
   {
-    id: "P005",
-    name: "Ethan Hunt",
-    totalViews: "25,800",
-    instaId: "@ethan_hunt",
-    proofDate: "May 9, 2024",
+    id: 'P005',
+    name: 'Ethan Hunt',
+    totalViews: '25,800',
+    instaId: '@ethan_hunt',
+    proofDate: 'May 9, 2024',
   },
 ];
+
+const mockProof = {
+  fullName: 'Koushith Amin',
+  username: 'koushith__',
+  hashtags: [
+    {
+      x: 0.8888888888888881,
+      y: 0.9376923150282641,
+      width: 0.058184615384615,
+      height: 0.022500000000000003,
+      rotation: 0,
+      hashtag: {
+        name: 'test',
+        id: '17841563557120538',
+      },
+      id: null,
+    },
+  ],
+  viewerCount: 2,
+};
+
+const rawProof = {
+  identifier: '0xd7960c525e1413677c87415ce2b07084a2b1988d0ddc288a7a74c15623ef4612',
+  claimData: {
+    provider: 'http',
+    parameters:
+      '{"additionalClientOptions":{},"body":"{{REQ_BODY_GRD}}","geoLocation":"","headers":{"Referer":"https://www.instagram.com/accounts/edit","Sec-Fetch-Mode":"same-origin","User-Agent":"Mozilla/5.0 (iPhone; CPU iPhone OS 18_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Safari/604.1"},"method":"POST","paramValues":{"REQ_BODY_GRD":"av=17841407002361281&__d=www&__user=0&__a=1&__req=1a&__hs=20032.HYP%3Ainstagram_web_pkg.2.1..0.1&dpr=3&__ccg=UNKNOWN&__rev=1017946529&__s=ruwqw8%3Aelipdk%3Afzj6m5&__hsi=7433834680408571407&__dyn=7xeUjG1mxu1syUbFp41twpUnwgU7SbzEdF8aUco2qwJxS0k24o1DU2_CwjE1EE2Cw8G11wBz81s8hwGxu786a3a1YwBgao6C0Mo2swaOfK0EUjwGzEaE2iwNwmE2eUlwhEe87q7U1mUdEGdwtUeo9UaQ0Lo6-3u2WE5B08-269wr86C1mgcEed6goK10xKi2K7E5yqcxK2K0Pay9rx66E&__csr=grjNQ8OhQDkQRqEzJWXP9-B9T97tlQBkZ8yAFft9Vbh7QGECWlQLhlRFajyuC9mjic8KuiqLl9GAQXBCWizUyENpGEExDDACxObxyU-SuGBCyEjm9JoyRLVELyvxLy9e8GGCXDoOi-aByo-boK5EjypFki8G6E01f89E2Ayo7C0ki0kFap3onw2c83IBxyzj01y60pC1s80qx02XpVRD4G0oLAGmbCxS5sE48GplEs1Iu1WwSiix53CZ0e-swC2OfwIo11ob8mAG15Oxy1LwiU3Cg8o3Zw080K0To0gBw&__comet_req=7&fb_dtsg=NAcOVYmtQiTFNPnVnGRFLrAlX47Dj5ewtDDZ5mjEZQOZsMFQh_shnaA%3A17843696212148243%3A1727436528&jazoest=26333&lsd=vrTl_kMdBLUiyVWxVEei-A&__spin_r=1017946529&__spin_b=trunk&__spin_t=1730824513&fb_api_caller_class=RelayModern&fb_api_req_friendly_name=PolarisStoriesV3ReelPageStandaloneQuery&variables=%7B%22reel_ids_arr%22%3A%5B%226970249412%22%5D%7D&server_timestamps=true&doc_id=8499024106872104","ig_mention":"{\\"full_name\\":\\"Koushith Amin\\",\\"username\\":\\"koushith__\\"}","story_hashtags":"[{\\"x\\":0.8888888888888881,\\"y\\":0.9376923150282641,\\"width\\":0.058184615384615,\\"height\\":0.022500000000000003,\\"rotation\\":0.0,\\"hashtag\\":{\\"name\\":\\"test\\",\\"id\\":\\"17841563557120538\\"},\\"id\\":null}]","viewer_count":"0"},"responseMatches":[{"invert":false,"type":"contains","value":"\\"ig_mention\\":{{ig_mention}}"},{"invert":false,"type":"contains","value":"\\"story_hashtags\\":{{story_hashtags}}"},{"invert":false,"type":"contains","value":"\\"viewer_count\\":{{viewer_count}}"}],"responseRedactions":[{"jsonPath":"$.data.xdt_api__v1__feed__reels_media.reels_media[0].items[0].story_bloks_stickers[0].bloks_sticker.sticker_data.ig_mention","regex":"\\"ig_mention\\":(.*)","xPath":""},{"jsonPath":"$.data.xdt_api__v1__feed__reels_media.reels_media[0].items[0].story_hashtags","regex":"\\"story_hashtags\\":(.*)","xPath":""},{"jsonPath":"$.data.xdt_api__v1__feed__reels_media.reels_media[0].items[0].viewer_count","regex":"\\"viewer_count\\":(.*)","xPath":""}],"url":"https://www.instagram.com/graphql/query"}',
+    owner: '0x6132ffb18a12bd9a0e82df243c6c07e5db245664',
+    timestampS: 1730824543,
+    context:
+      '{"contextAddress":"0x9ccCA0a968A9bc5916E0de43Ea2D68321655ae67","contextMessage":"User registration proof","extractedParameters":{"REQ_BODY_GRD":"av=17841407002361281&__d=www&__user=0&__a=1&__req=1a&__hs=20032.HYP%3Ainstagram_web_pkg.2.1..0.1&dpr=3&__ccg=UNKNOWN&__rev=1017946529&__s=ruwqw8%3Aelipdk%3Afzj6m5&__hsi=7433834680408571407&__dyn=7xeUjG1mxu1syUbFp41twpUnwgU7SbzEdF8aUco2qwJxS0k24o1DU2_CwjE1EE2Cw8G11wBz81s8hwGxu786a3a1YwBgao6C0Mo2swaOfK0EUjwGzEaE2iwNwmE2eUlwhEe87q7U1mUdEGdwtUeo9UaQ0Lo6-3u2WE5B08-269wr86C1mgcEed6goK10xKi2K7E5yqcxK2K0Pay9rx66E&__csr=grjNQ8OhQDkQRqEzJWXP9-B9T97tlQBkZ8yAFft9Vbh7QGECWlQLhlRFajyuC9mjic8KuiqLl9GAQXBCWizUyENpGEExDDACxObxyU-SuGBCyEjm9JoyRLVELyvxLy9e8GGCXDoOi-aByo-boK5EjypFki8G6E01f89E2Ayo7C0ki0kFap3onw2c83IBxyzj01y60pC1s80qx02XpVRD4G0oLAGmbCxS5sE48GplEs1Iu1WwSiix53CZ0e-swC2OfwIo11ob8mAG15Oxy1LwiU3Cg8o3Zw080K0To0gBw&__comet_req=7&fb_dtsg=NAcOVYmtQiTFNPnVnGRFLrAlX47Dj5ewtDDZ5mjEZQOZsMFQh_shnaA%3A17843696212148243%3A1727436528&jazoest=26333&lsd=vrTl_kMdBLUiyVWxVEei-A&__spin_r=1017946529&__spin_b=trunk&__spin_t=1730824513&fb_api_caller_class=RelayModern&fb_api_req_friendly_name=PolarisStoriesV3ReelPageStandaloneQuery&variables=%7B%22reel_ids_arr%22%3A%5B%226970249412%22%5D%7D&server_timestamps=true&doc_id=8499024106872104","ig_mention":"{\\"full_name\\":\\"Koushith Amin\\",\\"username\\":\\"koushith__\\"}","story_hashtags":"[{\\"x\\":0.8888888888888881,\\"y\\":0.9376923150282641,\\"width\\":0.058184615384615,\\"height\\":0.022500000000000003,\\"rotation\\":0.0,\\"hashtag\\":{\\"name\\":\\"test\\",\\"id\\":\\"17841563557120538\\"},\\"id\\":null}]","viewer_count":"0"},"providerHash":"0xc58f049e259468165f920f3aa095db9fa7055e8f67ed9fe5754f5a7cf0ded349"}',
+    identifier: '0xd7960c525e1413677c87415ce2b07084a2b1988d0ddc288a7a74c15623ef4612',
+    epoch: 1,
+  },
+  signatures: [
+    '0x768545e0cde33261e0c1f5baaafc6ce7cb2ca4fd77d4cd80b9e779655a8842a30bbfde86b5fe6b035e8ad2ac19c656050459085b6ad00a9ca621fc095abee0271b',
+  ],
+  witnesses: [
+    {
+      id: '0x244897572368eadf65bfbc5aec98d8e5443a9072',
+      url: 'wss://witness.reclaimprotocol.org/ws',
+    },
+  ],
+  publicData: {},
+};
 
 interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({
-  className,
-  size = 24,
-  ...props
-}) => {
+export const Spinner: React.FC<SpinnerProps> = ({ className, size = 24, ...props }) => {
   return (
-    <div className={cn("animate-spin", className)} {...props}>
+    <div className={cn('animate-spin', className)} {...props}>
       <Loader2 size={size} />
     </div>
   );
@@ -89,54 +128,40 @@ export const Spinner: React.FC<SpinnerProps> = ({
 
 const QRCodeContent = ({ requestUrl }: { requestUrl: string }) => (
   <div className="flex flex-col items-center space-y-6 p-6">
-    <QRCode
-      value={requestUrl}
-      size={200}
-      className="border-4 border-white rounded-lg shadow-lg"
-    />
+    <QRCode value={requestUrl} size={200} className="border-4 border-white rounded-lg shadow-lg" />
     <div className="flex flex-col items-center space-y-4">
       <Spinner className="h-8 w-8 text-primary" />
-      <p className="text-sm text-muted-foreground text-center">
-        Waiting for Reclaim proofs to be submitted..
-      </p>
+      <p className="text-sm text-muted-foreground text-center">Waiting for Reclaim proofs to be submitted..</p>
     </div>
   </div>
 );
 
 export const CampaignDetailScreen = () => {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   const [requestUrl, setRequestUrl] = useState<string | null>(null);
 
   const { id } = useParams();
+  console.log('id', id);
 
-  const {
-    data: campaignData,
-    isLoading,
-    isError,
-  } = useGetCampaignByIdQuery(id as string);
+  const { data: campaignData, isLoading, isError } = useGetCampaignByIdQuery(id as string);
 
-  const [updateCampaign, { isLoading: isUpdating }] =
-    useUpdateCampaignByIdMutation();
-
+  const [updateCampaign, { isLoading: isUpdating }] = useUpdateCampaignByIdMutation();
+  const [updateSubmission, { isLoading: isUpdatingSubmission }] = useUpdateSubmissionByCampaignIdMutation();
   if (isLoading) return <CampaignDetailSkeleton />;
   if (isError) return <div>Error fetching campaign details</div>;
 
   const campaign = campaignData?.campaign;
 
   const reclaimInitilizer = async () => {
-    const response = await fetch(
-      `${getBaseUrl()}/api/reclaim/initialize-reclaim`
-    );
+    const response = await fetch(`${getBaseUrl()}/api/reclaim/initialize-reclaim`);
     const { reclaimProofRequestConfig } = await response.json();
 
-    console.log("reclaimProofRequestConfig", reclaimProofRequestConfig);
+    console.log('reclaimProofRequestConfig', reclaimProofRequestConfig);
 
     // Reconstruct the ReclaimProofRequest object
-    const reclaimProofRequest = await ReclaimProofRequest.fromJsonString(
-      reclaimProofRequestConfig
-    );
+    const reclaimProofRequest = await ReclaimProofRequest.fromJsonString(reclaimProofRequestConfig);
 
-    console.log("reclaimProofRequest- parsed", reclaimProofRequest);
+    console.log('reclaimProofRequest- parsed', reclaimProofRequest);
 
     // Generate request URL and status URL
     const requestUrl = await reclaimProofRequest.getRequestUrl();
@@ -147,7 +172,7 @@ export const CampaignDetailScreen = () => {
 
     await reclaimProofRequest.startSession({
       onSuccess: async (proofs: any) => {
-        console.log("Verification success", proofs);
+        console.log('Verification success', proofs);
         const { claimData } = proofs;
         const { extractedParameters } = JSON.parse(claimData.context);
 
@@ -156,38 +181,53 @@ export const CampaignDetailScreen = () => {
         const hashtags = JSON.parse(extractedParameters.story_hashtags);
         const viewerCount = extractedParameters.viewer_count;
 
-        console.log("Extracted data:", {
+        console.log('Extracted data:', {
           fullName,
           username,
           hashtags,
           viewerCount,
         });
 
+        const extractedProof = {
+          fullName,
+          username,
+          hashtags,
+          viewerCount,
+        };
+
         // TODO: Handle the extracted data (e.g., update state, send to server, etc.)
 
-        const updatedCampaign = await updateCampaign({
-          id: id as string,
-          campaign: {
-            submissions: [
-              {
-                campaign: id as string,
-                user: "67004fdeff27e63129bb908c" as string,
-                content: "test" as string,
+        // const updatedCampaign = await updateCampaign({
+        //   id: id as string,
+        //   campaign: {
+        //     submissions: [
+        //       {
+        //         campaign: id as string,
+        //         user: '67004fdeff27e63129bb908c' as string,
+        //         content: 'test' as string,
 
-                fullName: fullName as string,
-                username: username as string,
-                hashtags: hashtags as string,
-                viewCount: viewerCount as string,
-                rawProof: JSON.stringify(proofs),
-              },
-            ],
+        //         fullName: fullName as string,
+        //         username: username as string,
+        //         hashtags: hashtags as string,
+        //         viewCount: viewerCount as string,
+        //         rawProof: JSON.stringify(proofs),
+        //       },
+        //     ],
+        //   },
+        // });
+
+        const submission = await updateSubmission({
+          campaignId: id as string,
+          submission: {
+            extractedProof,
+            reclaimRawProof: proofs,
           },
         });
 
-        console.log("updatedCampaign", updatedCampaign);
+        console.log('submission', submission);
       },
       onError: (error: Error) => {
-        console.error("Verification failed", error);
+        console.error('Verification failed', error);
       },
     });
   };
@@ -228,10 +268,7 @@ export const CampaignDetailScreen = () => {
     >
       <div className="mx-auto max-w-6xl">
         <div className="max-lg:hidden">
-          <Link
-            to="/campaigns"
-            className="inline-flex items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
-          >
+          <Link to="/campaigns" className="inline-flex items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400">
             <ChevronLeft className="h-4 w-4" />
             Campaigns
           </Link>
@@ -246,7 +283,7 @@ export const CampaignDetailScreen = () => {
             <div className="w-32 shrink-0">
               <img
                 className="aspect-[3/2] rounded-lg shadow"
-                src={campaign?.bannerImage ?? "https://via.placeholder.com/300"}
+                src={campaign?.bannerImage ?? 'https://via.placeholder.com/300'}
                 alt="Campaign Banner"
               />
             </div>
@@ -260,40 +297,26 @@ export const CampaignDetailScreen = () => {
                 </span>
               </div>
               <div className="mt-2 text-sm/6 text-zinc-500">
-                {campaign?.startDate
-                  ? new Date(campaign.startDate).toLocaleDateString()
-                  : "N/A"}{" "}
-                -{" "}
-                {campaign?.endDate
-                  ? new Date(campaign.endDate).toLocaleDateString()
-                  : "N/A"}
+                {campaign?.startDate ? new Date(campaign.startDate).toLocaleDateString() : 'N/A'} -{' '}
+                {campaign?.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'N/A'}
               </div>
             </div>
           </div>
           {isDesktop ? (
             <Dialog>
               <DialogTrigger asChild>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button onClick={reclaimInitilizer}>Submit Your Proof</Button>
                 </motion.div>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Scan QR Code to Submit Proof</DialogTitle>
-                  <DialogDescription>
-                    Scan this QR code with your device to submit your proof.
-                  </DialogDescription>
+                  <DialogDescription>Scan this QR code with your device to submit your proof.</DialogDescription>
                 </DialogHeader>
                 {requestUrl && (
                   <div>
-                    <a
-                      href={requestUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a href={requestUrl} target="_blank" rel="noopener noreferrer">
                       Open Request URL
                     </a>
                     <QRCodeContent requestUrl={requestUrl} />
@@ -304,19 +327,14 @@ export const CampaignDetailScreen = () => {
           ) : (
             <Drawer>
               <DrawerTrigger asChild>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button>Submit Your Proof----</Button>
                 </motion.div>
               </DrawerTrigger>
               <DrawerContent>
                 <DrawerHeader className="text-left">
                   <DrawerTitle>Scan QR Code to Submit Proof</DrawerTitle>
-                  <DrawerDescription>
-                    Scan this QR code with your device to submit your proof.
-                  </DrawerDescription>
+                  <DrawerDescription>Scan this QR code with your device to submit your proof.</DrawerDescription>
                 </DrawerHeader>
                 <QRCodeContent requestUrl={requestUrl} />
               </DrawerContent>
@@ -341,12 +359,8 @@ export const CampaignDetailScreen = () => {
         >
           <div>
             <hr className="w-full border-t border-zinc-950/10 dark:border-white/10" />
-            <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">
-              Total budget
-            </div>
-            <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">
-              ${campaign?.budget}
-            </div>
+            <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">Total budget</div>
+            <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">${campaign?.budget}</div>
             <div className="mt-3 text-sm/6 sm:text-xs/6">
               <span className="inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline bg-lime-400/20 text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15">
                 +5.2%
@@ -356,12 +370,8 @@ export const CampaignDetailScreen = () => {
           </div>
           <div>
             <hr className="w-full border-t border-zinc-950/10 dark:border-white/10" />
-            <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">
-              Participants
-            </div>
-            <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">
-              {campaign?.submissions?.length || 0}
-            </div>
+            <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">Participants</div>
+            <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">{campaign?.submissions?.length || 0}</div>
             <div className="mt-3 text-sm/6 sm:text-xs/6">
               <span className="inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline bg-lime-400/20 text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15">
                 +12.3%
@@ -371,12 +381,8 @@ export const CampaignDetailScreen = () => {
           </div>
           <div>
             <hr className="w-full border-t border-zinc-950/10 dark:border-white/10" />
-            <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">
-              Total Views
-            </div>
-            <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">
-              112,200
-            </div>
+            <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">Total Views</div>
+            <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">112,200</div>
             <div className="mt-3 text-sm/6 sm:text-xs/6">
               <span className="inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline bg-lime-400/20 text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15">
                 +8.7%
@@ -446,6 +452,20 @@ export const CampaignDetailScreen = () => {
               </table>
             </div>
           </div>
+
+          <Button
+            onClick={() => {
+              updateSubmission({
+                campaignId: id as string,
+                submission: {
+                  extractedProof: mockProof,
+                  reclaimRawProof: rawProof,
+                },
+              });
+            }}
+          >
+            Submit Your Proof
+          </Button>
         </motion.div>
       </div>
     </motion.div>

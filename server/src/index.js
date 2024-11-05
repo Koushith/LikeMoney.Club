@@ -1,8 +1,10 @@
-import express from "express";
-import { connectDB } from "./utils/connectDB.js";
-import dotenv from "dotenv";
-import campaignRouter from "./router/campaign.route.js";
-import cors from "cors";
+import express from 'express';
+import { connectDB } from './utils/connectDB.js';
+import dotenv from 'dotenv';
+import reclaimRouter from './router/reclaim.route.js';
+import campaignRouter from './router/campaign.route.js';
+import submissionRouter from './router/submission.route.js';
+import cors from 'cors';
 
 // Add error handling to dotenv.config()
 dotenv.config();
@@ -14,10 +16,12 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 // Use campaign router
-app.use("/api/campaigns", campaignRouter);
+app.use('/api/campaigns', campaignRouter);
+app.use('/api/reclaim', reclaimRouter);
+app.use('/api/submission', submissionRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
+app.get('/', (req, res) => {
+  res.send('Hello World');
 });
 
 app.listen(PORT, () => {

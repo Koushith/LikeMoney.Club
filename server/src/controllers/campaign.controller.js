@@ -1,4 +1,4 @@
-import Campaign from "../model/campaign.js";
+import Campaign from '../model/campaign.js';
 /**
  * create a campaign
  * get all campaigns
@@ -14,17 +14,8 @@ import Campaign from "../model/campaign.js";
  */
 export const createCampaign = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      bannerImage,
-      budget,
-      startDate,
-      endDate,
-      minViews,
-      user,
-    } = req.body;
-    console.log("minViews", minViews);
+    const { name, description, bannerImage, budget, startDate, endDate, minViews, user } = req.body;
+    console.log('minViews', minViews);
     const campaign = await Campaign.create({
       name,
       description,
@@ -37,7 +28,7 @@ export const createCampaign = async (req, res) => {
     });
     res.status(201).json({
       success: true,
-      message: "Campaign created successfully",
+      message: 'Campaign created successfully',
       campaign,
     });
   } catch (error) {
@@ -86,6 +77,17 @@ export const updateCampaignById = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, budget, user } = req.body;
+    console.log('title', title);
+    console.log('description', description);
+    console.log('budget', budget);
+    console.log('user', user);
+    console.log('req.body', req.body);
+    console.log('id', id);
+
+    if (!title || !description || !budget || !user) {
+      return res.status(400).json({ success: false, error: 'All fields are required' });
+    }
+
     const campaign = await Campaign.findByIdAndUpdate(id, {
       title,
       description,
@@ -107,9 +109,7 @@ export const deleteCampaignById = async (req, res) => {
   try {
     const { id } = req.params;
     await Campaign.findByIdAndDelete(id);
-    res
-      .status(200)
-      .json({ success: true, message: "Campaign deleted successfully" });
+    res.status(200).json({ success: true, message: 'Campaign deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
