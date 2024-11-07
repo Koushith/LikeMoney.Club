@@ -5,7 +5,7 @@ import reclaimRouter from './router/reclaim.route.js';
 import campaignRouter from './router/campaign.route.js';
 import submissionRouter from './router/submission.route.js';
 import cors from 'cors';
-
+import authRouter from './router/auth.router.js';
 // Add error handling to dotenv.config()
 dotenv.config();
 
@@ -19,6 +19,7 @@ app.use(cors());
 app.use('/api/campaigns', campaignRouter);
 app.use('/api/reclaim', reclaimRouter);
 app.use('/api/submission', submissionRouter);
+app.use('/api/auth', authRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello World');
