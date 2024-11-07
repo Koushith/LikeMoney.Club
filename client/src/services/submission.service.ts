@@ -14,7 +14,13 @@ export const submissionApi = createApi({
         body: submission,
       }),
     }),
+    getSubmissionsByCampaignId: builder.query({
+      query: (campaignId) => ({
+        url: `/submission/${campaignId}`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
-export const { useUpdateSubmissionByCampaignIdMutation } = submissionApi;
+export const { useUpdateSubmissionByCampaignIdMutation, useGetSubmissionsByCampaignIdQuery } = submissionApi;

@@ -1,35 +1,37 @@
-import { createBrowserRouter } from "react-router-dom";
-import { RootLayout } from "./layouts";
-import { AuthScreen, CampaignDetailScreen, CreateCampaignScreen, HomeScreen } from "./screens";
-
+import { createBrowserRouter } from 'react-router-dom';
+import { RootLayout } from './layouts';
+import { AuthScreen, CampaignDetailScreen, CreateCampaignScreen, HomeScreen, ProfileScreen } from './screens';
 
 export const routerConfig = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <RootLayout />,
     children: [
       {
-        path: "/",
+        path: '/',
         element: <HomeScreen />,
         errorElement: <div>Error loading home screen</div>,
       },
       {
-        path: "/campaign/:id",
+        path: '/campaign/:id',
         element: <CampaignDetailScreen />,
         errorElement: <div>Error loading campaign detail screen</div>,
-      }
-      ,{
-        path: "/campaign",
+      },
+      {
+        path: '/campaign',
         element: <CreateCampaignScreen />,
         errorElement: <div>Error loading campaign screen</div>,
-      }
-      ,{
-        path: "/auth",
-        element: <AuthScreen />,
-        errorElement: <div>Error loading auth screen</div>, 
       },
-    
-
-    ]  
-  }
+      {
+        path: '/auth',
+        element: <AuthScreen />,
+        errorElement: <div>Error loading auth screen</div>,
+      },
+      {
+        path: '/profile',
+        element: <ProfileScreen />,
+        errorElement: <div>Error loading profile screen</div>,
+      },
+    ],
+  },
 ]);

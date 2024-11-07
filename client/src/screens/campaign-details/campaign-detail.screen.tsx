@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { Calendar, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import QRCode from 'react-qr-code';
@@ -26,48 +26,13 @@ import {
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { useGetCampaignByIdQuery, useUpdateCampaignByIdMutation } from '@/services/campaign.service';
+import { useGetCampaignByIdQuery } from '@/services/campaign.service';
 import { CampaignDetailSkeleton } from './campagin-details-skeliton';
 import { getBaseUrl } from '@/utils/helper';
-import { useUpdateSubmissionByCampaignIdMutation } from '@/services/submission.service';
-
-const mockParticipants = [
-  {
-    id: 'P001',
-    name: 'Alice Johnson',
-    totalViews: '15,000',
-    instaId: '@alice_j',
-    proofDate: 'May 5, 2024',
-  },
-  {
-    id: 'P002',
-    name: 'Bob Smith',
-    totalViews: '22,500',
-    instaId: '@bob_smith',
-    proofDate: 'May 6, 2024',
-  },
-  {
-    id: 'P003',
-    name: 'Charlie Brown',
-    totalViews: '18,700',
-    instaId: '@charlie_b',
-    proofDate: 'May 7, 2024',
-  },
-  {
-    id: 'P004',
-    name: 'Diana Prince',
-    totalViews: '30,200',
-    instaId: '@diana_p',
-    proofDate: 'May 8, 2024',
-  },
-  {
-    id: 'P005',
-    name: 'Ethan Hunt',
-    totalViews: '25,800',
-    instaId: '@ethan_hunt',
-    proofDate: 'May 9, 2024',
-  },
-];
+import {
+  useGetSubmissionsByCampaignIdQuery,
+  useUpdateSubmissionByCampaignIdMutation,
+} from '@/services/submission.service';
 
 const mockProof = {
   fullName: 'Koushith Amin',
@@ -145,8 +110,9 @@ export const CampaignDetailScreen = () => {
 
   const { data: campaignData, isLoading, isError } = useGetCampaignByIdQuery(id as string);
 
-  const [updateCampaign, { isLoading: isUpdating }] = useUpdateCampaignByIdMutation();
   const [updateSubmission, { isLoading: isUpdatingSubmission }] = useUpdateSubmissionByCampaignIdMutation();
+  const { data: submissions, isLoading: isLoadingSubmissions } = useGetSubmissionsByCampaignIdQuery(id as string);
+  console.log('submissions', submissions);
   if (isLoading) return <CampaignDetailSkeleton />;
   if (isError) return <div>Error fetching campaign details</div>;
 
@@ -156,12 +122,8 @@ export const CampaignDetailScreen = () => {
     const response = await fetch(`${getBaseUrl()}/api/reclaim/initialize-reclaim`);
     const { reclaimProofRequestConfig } = await response.json();
 
-    console.log('reclaimProofRequestConfig', reclaimProofRequestConfig);
-
     // Reconstruct the ReclaimProofRequest object
     const reclaimProofRequest = await ReclaimProofRequest.fromJsonString(reclaimProofRequestConfig);
-
-    console.log('reclaimProofRequest- parsed', reclaimProofRequest);
 
     // Generate request URL and status URL
     const requestUrl = await reclaimProofRequest.getRequestUrl();
@@ -181,40 +143,12 @@ export const CampaignDetailScreen = () => {
         const hashtags = JSON.parse(extractedParameters.story_hashtags);
         const viewerCount = extractedParameters.viewer_count;
 
-        console.log('Extracted data:', {
-          fullName,
-          username,
-          hashtags,
-          viewerCount,
-        });
-
         const extractedProof = {
           fullName,
           username,
           hashtags,
           viewerCount,
         };
-
-        // TODO: Handle the extracted data (e.g., update state, send to server, etc.)
-
-        // const updatedCampaign = await updateCampaign({
-        //   id: id as string,
-        //   campaign: {
-        //     submissions: [
-        //       {
-        //         campaign: id as string,
-        //         user: '67004fdeff27e63129bb908c' as string,
-        //         content: 'test' as string,
-
-        //         fullName: fullName as string,
-        //         username: username as string,
-        //         hashtags: hashtags as string,
-        //         viewCount: viewerCount as string,
-        //         rawProof: JSON.stringify(proofs),
-        //       },
-        //     ],
-        //   },
-        // });
 
         const submission = await updateSubmission({
           campaignId: id as string,
@@ -231,33 +165,6 @@ export const CampaignDetailScreen = () => {
       },
     });
   };
-
-  // const reclaimInitilizer = async () => {
-  //   const APP_ID = "0x624D6A92A5E75629c8352a8f105B7a222C7a6B6D";
-  //   const PROVIDER_ID = "b00f9875-ed44-4e08-b820-458f25dc5493";
-  //   const APP_SECRET =
-  //     "0x35fc484587319846b796178eee283c1d4151098a1e5af395e4f0efd110f7b2c8";
-  //   const reclaimProofRequest = await ReclaimProofRequest.init(
-  //     APP_ID,
-  //     APP_SECRET,
-  //     PROVIDER_ID
-  //   );
-
-  //   const requestUrl = await reclaimProofRequest.getRequestUrl();
-  //   console.log("Request URL:", requestUrl);
-  //   // In a real application, you would typically redirect the user to this URL or display it as a QR code.
-  //   const statusUrl = reclaimProofRequest.getStatusUrl();
-  //   console.log("Status URL:", statusUrl);
-  //   // Start Session and begin listening for proofs:
-  //   await reclaimProofRequest.startSession({
-  //     onSuccess: (proofs) => {
-  //       console.log("Verification success", proofs);
-  //     },
-  //     onError: (error) => {
-  //       console.error("Verification failed", error);
-  //     },
-  //   });
-  // };
 
   return (
     <motion.div
@@ -296,9 +203,17 @@ export const CampaignDetailScreen = () => {
                   Active
                 </span>
               </div>
-              <div className="mt-2 text-sm/6 text-zinc-500">
-                {campaign?.startDate ? new Date(campaign.startDate).toLocaleDateString() : 'N/A'} -{' '}
-                {campaign?.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'N/A'}
+
+              <div className="mt-2 flex items-center space-x-2 text-sm text-zinc-500">
+                <div className="flex items-center">
+                  <Calendar className="mr-2 w-4 h-4" />
+                  <span>{campaign?.startDate ? new Date(campaign.startDate).toLocaleDateString() : 'N/A'}</span>
+                </div>
+                <span>-</span>
+                <div className="flex items-center">
+                  <Calendar className="mr-2 w-4 h-4" />
+                  <span>{campaign?.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'N/A'}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -357,7 +272,7 @@ export const CampaignDetailScreen = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="mt-8 grid gap-8 sm:grid-cols-3"
         >
-          <div>
+          {/* <div>
             <hr className="w-full border-t border-zinc-950/10 dark:border-white/10" />
             <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">Total budget</div>
             <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">${campaign?.budget}</div>
@@ -367,8 +282,8 @@ export const CampaignDetailScreen = () => {
               </span>
               <span className="text-zinc-500"> from last campaign</span>
             </div>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <hr className="w-full border-t border-zinc-950/10 dark:border-white/10" />
             <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">Participants</div>
             <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">{campaign?.submissions?.length || 0}</div>
@@ -378,8 +293,8 @@ export const CampaignDetailScreen = () => {
               </span>
               <span className="text-zinc-500"> from last campaign</span>
             </div>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <hr className="w-full border-t border-zinc-950/10 dark:border-white/10" />
             <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">Total Views</div>
             <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">112,200</div>
@@ -389,7 +304,7 @@ export const CampaignDetailScreen = () => {
               </span>
               <span className="text-zinc-500"> from last campaign</span>
             </div>
-          </div>
+          </div> */}
         </motion.div>
 
         <motion.h2
@@ -426,25 +341,25 @@ export const CampaignDetailScreen = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockParticipants.map((participant, index) => (
+                  {submissions?.map((submission: any, index: number) => (
                     <motion.tr
-                      key={participant.id}
+                      key={submission._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.8 + index * 0.1, duration: 0.3 }}
                       className="hover:bg-zinc-950/[2.5%] dark:hover:bg-white/[2.5%]"
                     >
                       <td className="relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] border-b border-zinc-950/5 dark:border-white/5 py-4 sm:first:pl-1 sm:last:pr-1">
-                        {participant.name}
+                        {submission.user.username}
                       </td>
                       <td className="text-zinc-500 relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] border-b border-zinc-950/5 dark:border-white/5 py-4 sm:first:pl-1 sm:last:pr-1">
-                        {participant.totalViews}
+                        {submission.content.viewerCount}
                       </td>
                       <td className="relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] border-b border-zinc-950/5 dark:border-white/5 py-4 sm:first:pl-1 sm:last:pr-1">
-                        {participant.instaId}
+                        {submission.content.username}
                       </td>
                       <td className="text-right relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] border-b border-zinc-950/5 dark:border-white/5 py-4 sm:first:pl-1 sm:last:pr-1">
-                        {participant.proofDate}
+                        {new Date(submission.updatedAt).toLocaleDateString()}
                       </td>
                     </motion.tr>
                   ))}

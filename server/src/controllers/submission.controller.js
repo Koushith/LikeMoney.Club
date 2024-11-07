@@ -1,3 +1,4 @@
+import User from '../model/user.js';
 import Campaign from '../model/campaign.js';
 import Submission from '../model/submission.js';
 
@@ -38,5 +39,19 @@ export const updateSubmissionByCampaignId = async (req, res) => {
     return res.status(200).json(submission);
   } catch (error) {
     res.status(500).json({ message: 'Error updating submission', error });
+  }
+};
+
+export const getSubmissionsByCampaignId = async (req, res) => {
+  try {
+    console.log('getSubmissionsByCampaignId hit');
+    const { campaignId } = req.params;
+    const submissions = await Submission.find({ campaign: campaignId }).populate('user');
+    console.log('submissions', submissions);
+
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.log('error', error);
+    res.status(500).json({ message: 'Error getting submissions', error });
   }
 };
