@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema(
     },
     uid: {
       type: String,
-      sparse: true, // Add this line
-      unique: true, // Add this line if you want googleId to be unique when present
+      sparse: true,
+      unique: true,
     },
     role: {
       type: String,
