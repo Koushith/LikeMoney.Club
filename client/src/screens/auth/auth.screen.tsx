@@ -2,17 +2,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { signInWithGoogle } from '@/lib/auth';
 import { setUser } from '@/redux/slices/authSlice';
+import { useSignInMutation } from '@/services/auth.service';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 export const AuthScreen = () => {
   const navigate = useNavigate();
+  const [signIn] = useSignInMutation();
   const dispatch = useDispatch();
   const handleGoogleSignIn = async () => {
     // Logic for Google Sign-In goes here
     const user = await signInWithGoogle();
     console.log(user);
     if (user) {
+      const response = await signIn(user?.accessToken as string).unwrap();
+      console.log(response);
       dispatch(setUser(user as any));
       navigate('/');
     }

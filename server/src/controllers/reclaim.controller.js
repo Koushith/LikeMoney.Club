@@ -11,8 +11,6 @@ export const initializeReclaim = async (req, res) => {
       log: true,
     });
 
-    reclaimProofRequest.addContext('0x9ccCA0a968A9bc5916E0de43Ea2D68321655ae67', 'User registration proof');
-
     const reclaimProofRequestConfig = reclaimProofRequest.toJsonString();
 
     return res.json({ reclaimProofRequestConfig });

@@ -2,11 +2,13 @@ import { campaignApi } from '@/services/campaign.service';
 import { submissionApi } from '@/services/submission.service';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/redux/slices/authSlice';
+import { authService } from '@/services/auth.service';
 
 export const store = configureStore({
   reducer: {
     [campaignApi.reducerPath]: campaignApi.reducer,
     [submissionApi.reducerPath]: submissionApi.reducer,
+    [authService.reducerPath]: authService.reducer,
     auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -14,7 +16,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ['auth/setUser'],
       },
-    }).concat(campaignApi.middleware, submissionApi.middleware),
+    }).concat(campaignApi.middleware, submissionApi.middleware, authService.middleware),
   devTools: true,
 });
 

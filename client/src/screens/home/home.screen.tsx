@@ -1,29 +1,28 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Button } from "@/components/ui/button";
-import { PlusCircleIcon, LayoutGridIcon, LayoutListIcon } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { PlusCircleIcon, LayoutGridIcon, LayoutListIcon } from 'lucide-react';
 
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
-import { useNavigate } from "react-router-dom";
-import { useGetAllCampaignsQuery } from "@/services/campaign.service";
-import { Hero } from "./hero.component";
-import { CampaignCard } from "./campaign-card.component";
-import { Campaign } from "./types";
-import { CampaignList } from "./campaign-list.component";
-import { CampaignCardSkeleton } from "./campaign-card.component";
-import { CampaignListSkeleton } from "./campaign-list.component";
+import { useNavigate } from 'react-router-dom';
+import { useGetAllCampaignsQuery } from '@/services/campaign.service';
+import { Hero } from './hero.component';
+import { CampaignCard } from './campaign-card.component';
+import { Campaign } from './types';
+import { CampaignList } from './campaign-list.component';
+import { CampaignCardSkeleton } from './campaign-card.component';
+import { CampaignListSkeleton } from './campaign-list.component';
+import { getBearerToken } from '@/utils/helper';
 
 // Update the HomeScreen component
 export const HomeScreen: React.FC = () => {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const {
-    data: allCampaigns,
-    isLoading,
-    isError,
-    error,
-  } = useGetAllCampaignsQuery();
+  const token = getBearerToken();
+  console.log('token', token);
+
+  const { data: allCampaigns, isLoading, isError, error } = useGetAllCampaignsQuery();
 
   const navigate = useNavigate();
 
@@ -35,24 +34,21 @@ export const HomeScreen: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <div className="flex">
             <Button
-              variant={viewMode === "grid" ? "secondary" : "ghost"}
+              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
               size="icon"
-              onClick={() => setViewMode("grid")}
+              onClick={() => setViewMode('grid')}
             >
               <LayoutGridIcon className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === "list" ? "secondary" : "ghost"}
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
               size="icon"
-              onClick={() => setViewMode("list")}
+              onClick={() => setViewMode('list')}
             >
               <LayoutListIcon className="h-4 w-4" />
             </Button>
           </div>
-          <Button
-            className="flex items-center"
-            onClick={() => navigate("/campaign")}
-          >
+          <Button className="flex items-center" onClick={() => navigate('/campaign')}>
             <PlusCircleIcon className="mr-2 h-4 w-4" />
             List Campaign
           </Button>
@@ -64,7 +60,7 @@ export const HomeScreen: React.FC = () => {
         transition={{ duration: 0.5, staggerChildren: 0.1 }}
       >
         {isLoading ? (
-          viewMode === "grid" ? (
+          viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, index) => (
                 <CampaignCardSkeleton key={index} />
@@ -81,7 +77,7 @@ export const HomeScreen: React.FC = () => {
           <div>Error: {error?.toString()}</div>
         ) : (
           <>
-            {viewMode === "grid" ? (
+            {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {allCampaigns?.map((campaign: Campaign) => (
                   <CampaignCard key={campaign?._id} campaign={campaign} />

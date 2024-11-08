@@ -4,8 +4,9 @@ import dotenv from 'dotenv';
 import reclaimRouter from './router/reclaim.route.js';
 import campaignRouter from './router/campaign.route.js';
 import submissionRouter from './router/submission.route.js';
-import cors from 'cors';
 import authRouter from './router/auth.router.js';
+import cors from 'cors';
+
 // Add error handling to dotenv.config()
 dotenv.config();
 

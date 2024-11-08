@@ -1,7 +1,6 @@
-import * as admin from 'firebase-admin';
-import config from './firebase-config';
+import admin from 'firebase-admin';
+import config from './firebase-config.js';
 
-// Initialize Firebase Admin
 const serviceAccount = {
   type: config.type,
   project_id: config.project_id,
@@ -17,8 +16,9 @@ const serviceAccount = {
 };
 
 // Initialize the app
-admin.initializeApp({
+const app = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+  databaseURL: `https://${config.project_id}.firebaseio.com`,
 });
 
-export default admin;
+export default app;
