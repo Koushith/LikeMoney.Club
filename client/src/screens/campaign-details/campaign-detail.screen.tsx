@@ -33,6 +33,8 @@ import {
   useGetSubmissionsByCampaignIdQuery,
   useUpdateSubmissionByCampaignIdMutation,
 } from '@/services/submission.service';
+import { Badge } from '@/components/ui/badge';
+import { DEFAULT_BANNER_IMAGE } from '@/utils/constants';
 
 const mockProof = {
   fullName: 'Koushith Amin',
@@ -78,6 +80,8 @@ const rawProof = {
   ],
   publicData: {},
 };
+
+const defaultImage = 'https://framerusercontent.com/images/zoCYa3hQ3F2G4JtvWzpYa4yBNdA.png?scale-down-to=2048';
 
 interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: number;
@@ -127,7 +131,6 @@ export const CampaignDetailScreen = () => {
 
     // Generate request URL and status URL
     const requestUrl = await reclaimProofRequest.getRequestUrl();
-    const statusUrl = await reclaimProofRequest.getStatusUrl();
 
     setRequestUrl(requestUrl);
     //setStatusUrl(statusUrl);
@@ -186,22 +189,22 @@ export const CampaignDetailScreen = () => {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="mt-4 flex flex-wrap items-end justify-between gap-4"
         >
-          <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-6">
             <div className="w-32 shrink-0">
               <img
                 className="aspect-[3/2] rounded-lg shadow"
-                src={campaign?.bannerImage ?? 'https://via.placeholder.com/300'}
+                src={campaign?.bannerImage ?? DEFAULT_BANNER_IMAGE}
                 alt="Campaign Banner"
               />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="flex items-center gap-x-4">
                 <h1 className="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
                   {campaign?.name}
                 </h1>
-                <span className="inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline bg-lime-400/20 text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15">
+                {/* <span className="inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline bg-lime-400/20 text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15">
                   Active
-                </span>
+                </span> */}
               </div>
 
               <div className="mt-2 flex items-center space-x-2 text-sm text-zinc-500">
@@ -217,44 +220,6 @@ export const CampaignDetailScreen = () => {
               </div>
             </div>
           </div>
-          {isDesktop ? (
-            <Dialog>
-              <DialogTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button onClick={reclaimInitilizer}>Submit Your Proof</Button>
-                </motion.div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Scan QR Code to Submit Proof</DialogTitle>
-                  <DialogDescription>Scan this QR code with your device to submit your proof.</DialogDescription>
-                </DialogHeader>
-                {requestUrl && (
-                  <div>
-                    <a href={requestUrl} target="_blank" rel="noopener noreferrer">
-                      Open Request URL
-                    </a>
-                    <QRCodeContent requestUrl={requestUrl} />
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
-          ) : (
-            <Drawer>
-              <DrawerTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button>Submit Your Proof----</Button>
-                </motion.div>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader className="text-left">
-                  <DrawerTitle>Scan QR Code to Submit Proof</DrawerTitle>
-                  <DrawerDescription>Scan this QR code with your device to submit your proof.</DrawerDescription>
-                </DrawerHeader>
-                <QRCodeContent requestUrl={requestUrl} />
-              </DrawerContent>
-            </Drawer>
-          )}
         </motion.div>
 
         <motion.div
@@ -264,6 +229,18 @@ export const CampaignDetailScreen = () => {
           className="mt-6 text-sm/6 text-zinc-500 dark:text-zinc-400"
         >
           <p>{campaign?.description}</p>
+
+          {/* Add tagged businesses section */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {campaign?.taggedBusiness?.map((business: string, index: number) => (
+              <Badge
+                key={index}
+                className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+              >
+                {business}
+              </Badge>
+            ))}
+          </div>
         </motion.div>
 
         <motion.div
@@ -306,6 +283,30 @@ export const CampaignDetailScreen = () => {
             </div>
           </div> */}
         </motion.div>
+
+        <div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button onClick={reclaimInitilizer}>Submit Your Proof</Button>
+              </motion.div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Scan QR Code to Submit Proof</DialogTitle>
+                <DialogDescription>Scan this QR code with your device to submit your proof.</DialogDescription>
+              </DialogHeader>
+              {requestUrl && (
+                <div>
+                  <a href={requestUrl} target="_blank" rel="noopener noreferrer">
+                    Open Request URL
+                  </a>
+                  <QRCodeContent requestUrl={requestUrl} />
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        </div>
 
         <motion.h2
           initial={{ y: 20, opacity: 0 }}

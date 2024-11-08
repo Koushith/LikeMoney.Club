@@ -1,34 +1,28 @@
-import ProtoImg from "@/assets/proto.jpg";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, DollarSignIcon, EyeIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CampaignCardProps } from "./types";
+import ProtoImg from '@/assets/proto.jpg';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { CalendarIcon, DollarSignIcon, EyeIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { CampaignCardProps } from './types';
+
+const defaultImage = 'https://framerusercontent.com/images/zoCYa3hQ3F2G4JtvWzpYa4yBNdA.png?scale-down-to=2048';
 
 const backgroundImages = [
   ProtoImg,
-  "https://proofofliving.in/static/media/banner-2.6ce411cc58eaf163b63a.avif",
-  "https://framerusercontent.com/images/zoCYa3hQ3F2G4JtvWzpYa4yBNdA.png?scale-down-to=2048", // Coldplay image URL
+  'https://proofofliving.in/static/media/banner-2.6ce411cc58eaf163b63a.avif',
+  'https://framerusercontent.com/images/zoCYa3hQ3F2G4JtvWzpYa4yBNdA.png?scale-down-to=2048', // Coldplay image URL
 ];
 
-export const getRandomBackgroundImage = () =>
-  backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+export const getRandomBackgroundImage = () => backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
 
 // Update the Campaign interface to include an image URL
 
 export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
-  console.log("campaign", campaign);
+  console.log('campaign', campaign);
   const randomBackgroundImage = getRandomBackgroundImage();
   const navigate = useNavigate();
 
@@ -43,7 +37,7 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
       <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
         <div className="relative w-full h-48">
           <img
-            src={randomBackgroundImage}
+            src={campaign.bannerImage || defaultImage}
             alt={campaign.name}
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -52,21 +46,14 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl">{campaign?.name}</CardTitle>
-            <Avatar className="h-9 w-9">
-              <AvatarFallback>
-                {campaign?.name?.slice(0, 2).toUpperCase() ?? "N/A"}
-              </AvatarFallback>
-            </Avatar>
           </div>
-          <CardDescription>
-            <Badge variant="secondary">{campaign.taggedBusiness}</Badge>
-          </CardDescription>
+          {/* <CardDescription>{campaign.description}</CardDescription> */}
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center">
               <EyeIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{campaign.minViews} views</span>
+              <span className="text-sm">{campaign.minViews} views Required</span>
             </div>
             <div className="flex items-center">
               <DollarSignIcon className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -74,25 +61,18 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
             </div>
             <div className="flex items-center">
               <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">
-                {new Date(campaign.startDate).toLocaleDateString()}
-              </span>
+              <span className="text-sm">{new Date(campaign.startDate).toLocaleDateString()}</span>
             </div>
             <div className="flex items-center">
               <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
               <span className="text-sm">
-                {campaign.endDate
-                  ? new Date(campaign.endDate).toLocaleDateString()
-                  : "No end date"}
+                {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : 'No end date'}
               </span>
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button
-            onClick={() => navigate(`/campaign/${campaign._id}`)}
-            className="w-full"
-          >
+          <Button onClick={() => navigate(`/campaign/${campaign._id}`)} className="w-full">
             View More Details
           </Button>
         </CardFooter>

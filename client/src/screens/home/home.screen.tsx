@@ -13,14 +13,9 @@ import { Campaign } from './types';
 import { CampaignList } from './campaign-list.component';
 import { CampaignCardSkeleton } from './campaign-card.component';
 import { CampaignListSkeleton } from './campaign-list.component';
-import { getBearerToken } from '@/utils/helper';
 
-// Update the HomeScreen component
 export const HomeScreen: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  const token = getBearerToken();
-  console.log('token', token);
 
   const { data: allCampaigns, isLoading, isError, error } = useGetAllCampaignsQuery();
 

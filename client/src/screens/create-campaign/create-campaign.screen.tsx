@@ -3,10 +3,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader, Loader2, X } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { useCreateCampaignMutation } from '@/services/campaign.service';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+
+interface CampaignFormData {
+  name: string;
+  description: string;
+  bannerImage?: string;
+  budget: string;
+  startDate: string;
+  endDate: string;
+  minViews: number;
+  taggedBusinesses: string[];
+}
+
+interface FormErrors {
+  name?: string;
+  description?: string;
+  bannerImage?: string;
+  startDate?: string;
+  endDate?: string;
+  minViews?: string;
+}
 
 const TagInput = ({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<React.SetStateAction<string[]>> }) => {
   const [input, setInput] = useState<string>('');
@@ -15,15 +35,16 @@ const TagInput = ({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<R
     setInput(e.target.value);
   };
 
-  const handleInputKeyDown = (e) => {
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && input) {
       e.preventDefault();
+      console.log('input', input);
       setTags([...tags, input]);
       setInput('');
     }
   };
 
-  const removeTag = (index) => {
+  const removeTag = (index: number) => {
     setTags(tags.filter((_, i) => i !== index));
   };
 
@@ -53,16 +74,18 @@ const TagInput = ({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<R
 };
 
 export const CreateCampaignScreen = () => {
-  const [campaign, setCampaign] = useState({
+  const [campaign, setCampaign] = useState<CampaignFormData>({
     name: '',
     description: '',
     bannerImage: '',
     budget: '',
     startDate: '',
+    taggedBusinesses: [],
     endDate: '',
-    minViews: '',
+    minViews: 10,
   });
   const [taggedBusinesses, setTaggedBusinesses] = useState<string[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const navigate = useNavigate();
 
@@ -73,17 +96,64 @@ export const CreateCampaignScreen = () => {
     setCampaign((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Name validation
+    if (!campaign.name.trim()) {
+      newErrors.name = 'Campaign name is required';
+    } else if (campaign.name.length < 3) {
+      newErrors.name = 'Campaign name must be at least 3 characters';
+    }
+
+    // Description validation
+    if (campaign.description && campaign.description.length < 10) {
+      newErrors.description = 'Description must be at least 10 characters';
+    }
+
+    // Date validations
+    const startDate = new Date(campaign.startDate);
+    const endDate = new Date(campaign.endDate);
+    const today = new Date();
+
+    if (!campaign.startDate) {
+      newErrors.startDate = 'Start date is required';
+    } else if (startDate < today) {
+      newErrors.startDate = 'Start date cannot be in the past';
+    }
+
+    if (campaign.endDate && endDate <= startDate) {
+      newErrors.endDate = 'End date must be after start date';
+    }
+
+    // Min views validation
+    if (!campaign.minViews) {
+      newErrors.minViews = 'Minimum views is required';
+    } else if (campaign.minViews <= 0) {
+      newErrors.minViews = 'Minimum views must be greater than 0';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!validateForm()) {
+      toast.error('Please fix the form errors before submitting');
+      return;
+    }
     try {
+      //@ts-ignore
       const result = await createCampaign({
         ...campaign,
+        budget: Number(campaign.budget),
+        taggedBusiness: taggedBusinesses,
       }).unwrap();
       if (result) {
         console.log('Campaign created successfully');
         toast.success('Campaign created successfully');
-        // Clear the form state
         setCampaign({
           name: '',
           description: '',
@@ -91,9 +161,9 @@ export const CreateCampaignScreen = () => {
           budget: '',
           startDate: '',
           endDate: '',
-          minViews: '',
+          minViews: 0,
+          taggedBusinesses: [],
         });
-        setTaggedBusinesses([]);
         // Navigate to home screen
         navigate('/');
       }
@@ -111,10 +181,7 @@ export const CreateCampaignScreen = () => {
         {isError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
             <strong className="font-bold">Error!</strong>
-            <span className="block sm:inline">
-              {' '}
-              {error?.data?.message || 'An error occurred while creating the campaign.'}
-            </span>
+            <span className="block sm:inline"> {'An error occurred while creating the campaign.'}</span>
           </div>
         )}
 
@@ -133,7 +200,9 @@ export const CreateCampaignScreen = () => {
                 onChange={handleChange}
                 placeholder="Enter campaign name"
                 required
+                className={errors.name ? 'border-red-500' : ''}
               />
+              {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
@@ -144,7 +213,9 @@ export const CreateCampaignScreen = () => {
                 onChange={handleChange}
                 placeholder="Enter campaign description"
                 rows={4}
+                className={errors.description ? 'border-red-500' : ''}
               />
+              {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
             </div>
           </div>
         </section>
@@ -165,8 +236,9 @@ export const CreateCampaignScreen = () => {
                 value={campaign.bannerImage}
                 onChange={handleChange}
                 placeholder="Enter banner image URL"
-                required
+                className={errors.bannerImage ? 'border-red-500' : ''}
               />
+              {errors.bannerImage && <p className="text-sm text-red-500">{errors.bannerImage}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="taggedBusiness">Tagged Businesses</Label>
@@ -195,9 +267,11 @@ export const CreateCampaignScreen = () => {
                 onChange={handleChange}
                 placeholder="Enter minimum views target"
                 required
+                className={errors.minViews ? 'border-red-500' : ''}
               />
+              {errors.minViews && <p className="text-sm text-red-500">{errors.minViews}</p>}
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="budget">Budget</Label>
               <Input
                 id="budget"
@@ -207,7 +281,7 @@ export const CreateCampaignScreen = () => {
                 onChange={handleChange}
                 placeholder="Enter campaign budget"
               />
-            </div>
+            </div> */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate">Start Date</Label>
@@ -218,7 +292,9 @@ export const CreateCampaignScreen = () => {
                   value={campaign.startDate}
                   onChange={handleChange}
                   required
+                  className={errors.startDate ? 'border-red-500' : ''}
                 />
+                {errors.startDate && <p className="text-sm text-red-500">{errors.startDate}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date</Label>

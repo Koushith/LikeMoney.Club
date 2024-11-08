@@ -48,9 +48,6 @@ export const RootLayout = () => {
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to={'/profile'}>
             Profile
           </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to={'/settings'}>
-            Settings
-          </Link>
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -63,18 +60,13 @@ export const RootLayout = () => {
             <nav className="grid gap-6 text-lg font-medium">
               <Link className="flex items-center gap-2 text-lg font-semibold" to={''}>
                 <Package2 className="h-6 w-6" />
-                <span className="sr-only">Acme Inc</span>
+                <span className="sr-only">like.money</span>
               </Link>
-              <Link className="hover:text-foreground" to={''}>
+              <Link className="hover:text-foreground" to={'/'}>
                 Home
               </Link>
-              <Link className="text-muted-foreground hover:text-foreground" to={''}>
-                About
-              </Link>
-              <Link className="text-muted-foreground hover:text-foreground" to={''}>
-                Developers
-              </Link>
-              <Link className="text-muted-foreground hover:text-foreground" to={''}>
+
+              <Link className="text-muted-foreground hover:text-foreground" to={'/profile'}>
                 Profile
               </Link>
             </nav>
