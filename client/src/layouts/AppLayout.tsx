@@ -1,4 +1,4 @@
-import { Menu, Package2, Search } from 'lucide-react';
+import { Menu, Package2, Search, LogOut } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -16,12 +16,24 @@ import { Toaster } from '@/components/ui/toaster';
 import { useSelector } from 'react-redux';
 import { selectUser } from '@/redux/slices/authSlice';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useDispatch } from 'react-redux';
+import { clearAuth } from '@/redux/slices/authSlice';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export const RootLayout = () => {
   const { setTheme } = useTheme();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const user = useSelector(selectUser);
+
+  const handleSignOut = () => {
+    signOut(auth);
+    dispatch(clearAuth());
+    navigate('/auth');
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="container sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -107,11 +119,17 @@ export const RootLayout = () => {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              {/* <Button variant="secondary" size="icon" className="rounded-full">
-                <CircleUser className="h-5 w-5" />
+              <Button variant="outline" size="icon">
+                <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle user menu</span>
-              </Button> */}
+              </Button>
             </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>

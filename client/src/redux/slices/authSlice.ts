@@ -8,7 +8,7 @@ interface AuthState {
     email: string | null;
     displayName: string | null;
     photoURL: string | null;
-    token: string;
+    accessToken: string;
   } | null;
   isLoading: boolean;
   error: string | null;
@@ -36,6 +36,14 @@ const authSlice = createSlice({
       state.error = action.payload;
       state.isLoading = false;
     },
+    setAuthData: (state, action: PayloadAction<{ user: AuthState['user']; accessToken: string }>) => {
+      if (action.payload.user) {
+        state.user = {
+          ...action.payload.user,
+          accessToken: action.payload.accessToken,
+        };
+      }
+    },
     clearAuth: (state) => {
       state.user = null;
       state.error = null;
@@ -44,7 +52,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setLoading, setError, clearAuth } = authSlice.actions;
+export const { setUser, setLoading, setError, setAuthData, clearAuth } = authSlice.actions;
 export default authSlice.reducer;
 
 // selectors

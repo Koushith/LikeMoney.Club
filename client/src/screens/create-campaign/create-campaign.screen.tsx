@@ -1,31 +1,25 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Loader, Loader2, X } from "lucide-react";
-import { useCreateCampaignMutation } from "@/services/campaign.service";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Loader, Loader2, X } from 'lucide-react';
+import { useCreateCampaignMutation } from '@/services/campaign.service';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
-const TagInput = ({
-  tags,
-  setTags,
-}: {
-  tags: string[];
-  setTags: React.Dispatch<React.SetStateAction<string[]>>;
-}) => {
-  const [input, setInput] = useState<string>("");
+const TagInput = ({ tags, setTags }: { tags: string[]; setTags: React.Dispatch<React.SetStateAction<string[]>> }) => {
+  const [input, setInput] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
   const handleInputKeyDown = (e) => {
-    if (e.key === "Enter" && input) {
+    if (e.key === 'Enter' && input) {
       e.preventDefault();
       setTags([...tags, input]);
-      setInput("");
+      setInput('');
     }
   };
 
@@ -41,11 +35,7 @@ const TagInput = ({
           className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-sm flex items-center"
         >
           {tag}
-          <button
-            type="button"
-            onClick={() => removeTag(index)}
-            className="ml-1 focus:outline-none"
-          >
+          <button type="button" onClick={() => removeTag(index)} className="ml-1 focus:outline-none">
             <X size={14} />
           </button>
         </span>
@@ -64,91 +54,74 @@ const TagInput = ({
 
 export const CreateCampaignScreen = () => {
   const [campaign, setCampaign] = useState({
-    name: "",
-    description: "",
-    bannerImage: "",
-    budget: "",
-    startDate: "",
-    endDate: "",
-    minViews: "",
+    name: '',
+    description: '',
+    bannerImage: '',
+    budget: '',
+    startDate: '',
+    endDate: '',
+    minViews: '',
   });
   const [taggedBusinesses, setTaggedBusinesses] = useState<string[]>([]);
 
   const navigate = useNavigate();
 
-  const [createCampaign, { isLoading, isError, error }] =
-    useCreateCampaignMutation();
+  const [createCampaign, { isLoading, isError, error }] = useCreateCampaignMutation();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCampaign((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const userInfo = {
-      email: "koushith97@gmail.com",
-      _id: "67004fdeff27e63129bb908c",
-    };
+
     try {
       const result = await createCampaign({
         ...campaign,
-        user: userInfo,
       }).unwrap();
       if (result) {
-        console.log("Campaign created successfully");
-        toast.success("Campaign created successfully");
+        console.log('Campaign created successfully');
+        toast.success('Campaign created successfully');
         // Clear the form state
         setCampaign({
-          name: "",
-          description: "",
-          bannerImage: "",
-          budget: "",
-          startDate: "",
-          endDate: "",
-          minViews: "",
+          name: '',
+          description: '',
+          bannerImage: '',
+          budget: '',
+          startDate: '',
+          endDate: '',
+          minViews: '',
         });
         setTaggedBusinesses([]);
         // Navigate to home screen
-        navigate("/");
+        navigate('/');
       }
     } catch (err) {
-      console.error("Failed to create campaign:", err);
-      toast.error("Failed to create campaign. Please try again.");
+      console.error('Failed to create campaign:', err);
+      toast.error('Failed to create campaign. Please try again.');
     }
   };
 
   return (
     <div className="container mx-auto py-10">
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-white mb-6">
-          Create New Campaign
-        </h1>
+        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-white mb-6">Create New Campaign</h1>
 
         {isError && (
-          <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-            role="alert"
-          >
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
             <strong className="font-bold">Error!</strong>
             <span className="block sm:inline">
-              {" "}
-              {error?.data?.message ||
-                "An error occurred while creating the campaign."}
+              {' '}
+              {error?.data?.message || 'An error occurred while creating the campaign.'}
             </span>
           </div>
         )}
 
         <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2 mb-10">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-zinc-950 dark:text-white">
-              Campaign Details
-            </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Provide basic information about your campaign.
-            </p>
+            <h2 className="text-lg font-semibold text-zinc-950 dark:text-white">Campaign Details</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Provide basic information about your campaign.</p>
           </div>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -180,12 +153,8 @@ export const CreateCampaignScreen = () => {
 
         <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2 mb-10">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-zinc-950 dark:text-white">
-              Campaign Media
-            </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Add visual elements to your campaign.
-            </p>
+            <h2 className="text-lg font-semibold text-zinc-950 dark:text-white">Campaign Media</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Add visual elements to your campaign.</p>
           </div>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -210,9 +179,7 @@ export const CreateCampaignScreen = () => {
 
         <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2 mb-10">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-zinc-950 dark:text-white">
-              Campaign Goals and Timeline
-            </h2>
+            <h2 className="text-lg font-semibold text-zinc-950 dark:text-white">Campaign Goals and Timeline</h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               Set your campaign's objectives, budget, and time constraints.
             </p>
@@ -255,13 +222,7 @@ export const CreateCampaignScreen = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  name="endDate"
-                  type="date"
-                  value={campaign.endDate}
-                  onChange={handleChange}
-                />
+                <Input id="endDate" name="endDate" type="date" value={campaign.endDate} onChange={handleChange} />
               </div>
             </div>
           </div>
@@ -280,7 +241,7 @@ export const CreateCampaignScreen = () => {
                 Creating...
               </>
             ) : (
-              "Create Campaign"
+              'Create Campaign'
             )}
           </Button>
         </div>
