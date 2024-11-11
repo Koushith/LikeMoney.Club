@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const campaignSchema = new mongoose.Schema(
   {
@@ -13,10 +13,10 @@ const campaignSchema = new mongoose.Schema(
     },
     bannerImage: {
       type: String,
-      required: true,
+      default: 'https://framerusercontent.com/images/zoCYa3hQ3F2G4JtvWzpYa4yBNdA.png?scale-down-to=2048',
     },
     taggedBusiness: {
-      type: String, //TODO: check this later
+      type: [String], //TODO: check this later
     },
     minViews: {
       type: Number,
@@ -33,13 +33,13 @@ const campaignSchema = new mongoose.Schema(
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     submissions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Submission",
+        ref: 'Submission',
       },
     ],
     // ... other campaign-related fields ...
@@ -49,6 +49,6 @@ const campaignSchema = new mongoose.Schema(
   }
 );
 
-const Campaign = mongoose.model("Campaign", campaignSchema);
+const Campaign = mongoose.model('Campaign', campaignSchema);
 
 export default Campaign;

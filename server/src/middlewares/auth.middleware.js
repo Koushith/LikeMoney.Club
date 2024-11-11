@@ -1,5 +1,5 @@
-import admin from '../config/firebase';
-import User from '../model/user';
+import admin from '../config/firebase.js';
+import User from '../model/user.js';
 
 export const authMiddleware = async (req, res, next) => {
   try {
@@ -16,6 +16,7 @@ export const authMiddleware = async (req, res, next) => {
     }
 
     const user = await User.findOne({ uid: decodedToken.uid });
+    console.log('user from db middleware', user);
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
@@ -23,7 +24,7 @@ export const authMiddleware = async (req, res, next) => {
 
     req.user = {
       uid: user.uid,
-      id: user._id,
+      _id: user._id,
     };
 
     next();

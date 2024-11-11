@@ -4,9 +4,15 @@ import Submission from '../model/submission.js';
 
 export const updateSubmissionByCampaignId = async (req, res) => {
   try {
+    console.log('updateSubmissionByCampaignId hit');
+    const user = req.user;
+    console.log('user- FROM MIDDLEWARE NO ', user);
     const { campaignId } = req.params;
     const { extractedProof, reclaimRawProof } = req.body;
-    const userId = '67004fdeff27e63129bb908c';
+
+    if (!user) {
+      return res.status(401).json({ message: 'Token is missing or invalid' });
+    }
 
     // Find the campaign by ID
     const campaign = await Campaign.findById(campaignId);
@@ -15,7 +21,7 @@ export const updateSubmissionByCampaignId = async (req, res) => {
     }
 
     // Check for an existing submission by the same user for the same campaign
-    let submission = await Submission.findOne({ campaign: campaignId, user: userId });
+    let submission = await Submission.findOne({ campaign: campaignId, user: user._id });
 
     if (submission) {
       // Update existing submission
@@ -26,7 +32,7 @@ export const updateSubmissionByCampaignId = async (req, res) => {
       // Create a new submission
       submission = await Submission.create({
         campaign: campaignId,
-        user: userId,
+        user: user._id,
         content: extractedProof,
         reclaimRawProof: reclaimRawProof,
       });
@@ -38,6 +44,7 @@ export const updateSubmissionByCampaignId = async (req, res) => {
 
     return res.status(200).json(submission);
   } catch (error) {
+    console.log('error', error);
     res.status(500).json({ message: 'Error updating submission', error });
   }
 };

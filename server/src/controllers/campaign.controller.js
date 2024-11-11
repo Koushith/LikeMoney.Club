@@ -14,8 +14,13 @@ import Campaign from '../model/campaign.js';
  */
 export const createCampaign = async (req, res) => {
   try {
-    const { name, description, bannerImage, budget, startDate, endDate, minViews, user } = req.body;
-    console.log('minViews', minViews);
+    const { name, description, bannerImage, budget, startDate, endDate, minViews, taggedBusiness } = req.body;
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: 'Token is missing or invalid' });
+    }
+
     const campaign = await Campaign.create({
       name,
       description,
@@ -24,6 +29,7 @@ export const createCampaign = async (req, res) => {
       startDate,
       endDate,
       minViews,
+      taggedBusiness,
       user: user._id,
     });
     res.status(201).json({
@@ -66,6 +72,7 @@ export const getCampaignById = async (req, res) => {
     });
     res.status(200).json({ success: true, campaign });
   } catch (error) {
+    console.log('error', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -78,15 +85,14 @@ export const getCampaignById = async (req, res) => {
 export const updateCampaignById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, budget, user } = req.body;
-    console.log('title', title);
-    console.log('description', description);
-    console.log('budget', budget);
-    console.log('user', user);
-    console.log('req.body', req.body);
-    console.log('id', id);
+    const { title, description, budget } = req.body;
+    const user = req.user;
 
-    if (!title || !description || !budget || !user) {
+    if (!user) {
+      return res.status(401).json({ message: 'Token is missing or invalid' });
+    }
+
+    if (!title || !description || !budget) {
       return res.status(400).json({ success: false, error: 'All fields are required' });
     }
 
@@ -108,6 +114,7 @@ export const updateCampaignById = async (req, res) => {
  * @param {Object} res - Express response object
  */
 export const deleteCampaignById = async (req, res) => {
+  //TODO: add edgecases only admin or creator can delete
   try {
     const { id } = req.params;
     await Campaign.findByIdAndDelete(id);
